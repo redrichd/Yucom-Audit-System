@@ -1,66 +1,48 @@
 import pdfplumber
-from typing import List, Dict, Any
+import io
+import logging
 
-def parse_pdf_bytes(file_bytes: bytes) -> List[Dict[str, Any]]:
+# 設定日誌以利在 Render Logs 中觀察進度
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+def parse_pdf_bytes(pdf_bytes: bytes):
     """
-    Parse PDF bytes using pdfplumber to extraction text and coordinates.
-    Returns a list of page objects with text and layout info.
+    以分頁讀取並立即釋放資源的方式解析 PDF，
+    專為記憶體受限環境（如 Render Free Tier）優化。
     """
-    import uuid
-    parsed_pages = []
-    current_case_id = None
-    current_case_name = None
-    current_group_id = str(uuid.uuid4()) # Start with a default group
+    extracted_data = []
     
-    with pdfplumber.open(file_bytes) as pdf:
-        for page_num, page in enumerate(pdf.pages, start=1):
-            # Extract words with bounding boxes
-            words = page.extract_words()
-            
-            # Extract raw text for easier regex matching (optional)
-            raw_text = page.extract_text() or ""
-            
-            # Simple metadata extraction for grouping
-            case_id = ""
-            case_name = ""
-            
-            # Regex to find Case ID (e.g., FX123456) and Name
-            import re
-            img_id_match = re.search(r'個案編號\s*[:：]\s*([A-Za-z0-9]+)', raw_text)
-            img_name_match = re.search(r'個案姓名\s*[:：]\s*(\S+)', raw_text)
-            
-            if img_id_match:
-                case_id = img_id_match.group(1)
-                # Found a header! This marks the start of a NEW record group.
-                # Even if case_id is same as previous, it's a new sheet (e.g. different week).
-                current_group_id = str(uuid.uuid4())
-                current_case_id = case_id
-            
-            if img_name_match:
-                case_name = img_name_match.group(1)
-                current_case_name = case_name
-                
-            # If no header found, we stay in the current_group_id (continuation)
-            # and inherit context
-            if not case_id and current_case_id:
-                case_id = current_case_id
-            
-            if not case_name and current_case_name:
-                case_name = current_case_name
+    try:
+        # 使用 io.BytesIO 將二進位資料轉為類文件物件
+        with pdfplumber.open(io.BytesIO(pdf_bytes)) as pdf:
+            total_pages = len(pdf.pages)
+            logger.info(f"開始解析 PDF，總計 {total_pages} 頁")
 
-            parsed_pages.append({
-                "page": page_num,
-                "width": float(page.width),
-                "height": float(page.height),
-                "words": words, # List of {text, x0, top, x1, bottom}
-                "raw_text": raw_text,
-                "rects": page.rects,
-                "lines": page.lines,
-                "curves": page.curves,
-                "images": page.images,
-                "case_id": case_id,
-                "case_name": case_name,
-                "group_id": current_group_id 
-            })
-            
-    return parsed_pages
+            for i, page in enumerate(pdf.pages):
+                # 1. 提取純文字（文字字串遠比頁面物件輕量）
+                text = page.extract_text()
+                
+                # 2. 封裝成簡單的字典
+                page_info = {
+                    "page_number": i + 1,
+                    "content": text if text else "",
+                    # 如果有需要提取表格，可以在此處執行，但會增加記憶體消耗
+                    # "tables": page.extract_tables() 
+                }
+                
+                extracted_data.append(page_info)
+                
+                # 3. 每 50 頁在 Logs 紀錄一次進度，確認後端沒死機
+                if (i + 1) % 50 == 0:
+                    logger.info(f"已處理 {i + 1} / {total_pages} 頁...")
+
+                # 在 loop 的下一步，目前的 'page' 物件會被 Python 垃圾回收機制標記為可釋放
+                # 因為我們已經將需要的文字存入 extracted_data，不再引用 page 物件
+
+        logger.info("PDF 解析完成")
+        return extracted_data
+
+    except Exception as e:
+        logger.error(f"解析 PDF 時發生錯誤: {str(e)}")
+        raise e

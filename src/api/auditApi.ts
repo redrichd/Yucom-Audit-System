@@ -1,6 +1,6 @@
 import { AuditResponse } from '../types';
 
-const API_BASE_URL = 'http://localhost:8000/api';
+const API_BASE_URL = 'https://yucom-audit-backend.onrender.com/api';
 
 export const auditApi = {
     async uploadFile(file: File): Promise<AuditResponse> {
