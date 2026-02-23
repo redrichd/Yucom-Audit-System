@@ -3,17 +3,17 @@ from typing import List
 
 router = APIRouter()
 
-from backend.services.pdf_parser import parse_pdf_bytes
-from backend.logic.yc01_rules import check_time_overlaps
-from backend.logic.yc02_rules import check_signature_fields
-from backend.logic.static_checks import check_static_rules
-from backend.logic.time_checks import check_time_rules
-from backend.logic.content_checks import check_content_rules
+from services.pdf_parser import parse_pdf_bytes
+from logic.yc01_rules import check_time_overlaps
+from logic.yc02_rules import check_signature_fields
+from logic.static_checks import check_static_rules
+from logic.time_checks import check_time_rules
+from logic.content_checks import check_content_rules
 import io
 
 from starlette.concurrency import run_in_threadpool
 
-from backend.logic.pre_check import is_record_active
+from logic.pre_check import is_record_active
 from collections import defaultdict
 import uuid
 
