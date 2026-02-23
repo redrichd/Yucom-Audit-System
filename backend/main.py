@@ -7,6 +7,7 @@ app = FastAPI(title="Yucom Audit System API")
 origins = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
+    "https://redrichd.github.io",
 ]
 
 app.add_middleware(
