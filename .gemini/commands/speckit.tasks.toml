@@ -1,0 +1,86 @@
+description = "Generate an actionable, dependency-ordered tasks.md for the feature based on available design artifacts."
+
+prompt = """
+---
+description: Generate an actionable, dependency-ordered tasks.md for the feature based on available design artifacts.
+handoffs: 
+  - label: Analyze For Consistency
+    agent: speckit.analyze
+    prompt: Run a project analysis for consistency
+    send: true
+  - label: Implement Project
+    agent: speckit.implement
+    prompt: Start the implementation in phases
+    send: true
+---
+
+## User Input
+
+```text
+$ARGUMENTS
+```
+
+You **MUST** consider the user input before proceeding (if not empty).
+
+## Yucom Project Standards (MUST FOLLOW)
+
+All tasks for the **Yucom Audit System (悠康電子服務紀錄稽核系統)** must adhere to these standards:
+
+### 1. Language & Format
+- **Strict Requirement**: All tasks, phases, and descriptions **MUST** be written in **Traditional Chinese (zh-TW)**.
+- Use professional terminology (e.g., "建立實體", "實作稽核邏輯").
+
+### 2. Technical Context
+- **Frontend/Backend Separation**: Tasks must clearly separate React frontend and FastAPI backend implementation.
+- **Audit Logic (YC Rules)**: Specific tasks for implementing YC01-8, YC01-10, etc.
+- **PDF Visualization**: Tasks for coordinate mapping and canvas overlay implementation.
+- **Cleanup & Privacy**: Mandatory tasks for memory cleanup (`URL.revokeObjectURL()`).
+
+## Outline
+
+1. **Setup**: Run `.specify/scripts/powershell/check-prerequisites.ps1 -Json` from repo root and parse FEATURE_DIR and AVAILABLE_DOCS list.
+
+2. **Load design documents**: Read from FEATURE_DIR (plan.md, spec.md, data-model.md, etc.).
+
+3. **Execute task generation workflow**:
+   - Generate tasks organized by user story in **zh-TW**.
+   - Ensure tasks follow the Yucom tech stack (FastAPI, React).
+   - Validate task completeness.
+
+4. **Generate tasks.md**: Use `.specify/templates/tasks-template.md` as structure, fill with:
+   - Correct feature name in **zh-TW**.
+   - Phase 1: 專案初始化 (Setup)
+   - Phase 2: 基礎建設 (Foundational)
+   - Phase 3+: 使用者故事實作 (User Story implementation)
+   - 最終階段: 優化與 cross-cutting concerns.
+   - All tasks must follow the strict checklist format (**zh-TW**).
+
+5. **Report**: Output path and summary in **zh-TW**.
+
+## Task Generation Rules
+
+### Checklist Format (REQUIRED)
+
+Every task MUST strictly follow this format:
+
+```text
+- [ ] [TaskID] [P?] [Story?] 描述內容 (含檔案路徑)
+```
+
+**Format Components**:
+1. **Checkbox**: `- [ ]`
+2. **Task ID**: T001, T002...
+3. **[P] marker**: If parallelizable.
+4. **[Story] label**: [US1], [US2]...
+5. **描述內容**: Action + file path in **zh-TW**.
+
+**範例 (Examples)**:
+- ✅ 正確: `- [ ] T001 根據實作計畫建立專案結構`
+- ✅ 正確: `- [ ] T012 [P] [US1] 在 src/models/audit.py 中建立稽核模型`
+
+### Phase Structure (**zh-TW Only**)
+- **第一階段**: 專案設定 (Setup)
+- **第二階段**: 基礎建設 (Foundational)
+- **第三階段及之後**: 使用者故事實作 (Priority Order)
+- **最終階段**: 細節優化與安全性核對
+"""

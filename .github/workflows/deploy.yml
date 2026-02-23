@@ -1,0 +1,42 @@
+name: Yucom CI/CD Pipeline
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [20.x]
+
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+        
+    - name: Install Dependencies
+      run: npm ci
+      
+    - name: Lint
+      run: npm run lint
+      
+    - name: Build
+      run: npm run build
+      
+    # 這裡可以加入部署步驟 (例如部署到 GitHub Pages 或 AWS S3)
+    # This section can be extended for deployment targets
+    - name: Upload Build Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: dist
+        path: dist

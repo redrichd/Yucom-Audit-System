@@ -1,0 +1,75 @@
+description = "Perform a non-destructive cross-artifact consistency and quality analysis across spec.md, plan.md, and tasks.md after task generation."
+
+prompt = """
+---
+description: Perform a non-destructive cross-artifact consistency and quality analysis across spec.md, plan.md, and tasks.md after task generation.
+---
+
+## User Input
+
+```text
+$ARGUMENTS
+```
+
+You **MUST** consider the user input before proceeding (if not empty).
+
+## Yucom Project Standards (MUST FOLLOW)
+
+All analysis for the **Yucom Audit System (悠康電子服務紀錄稽核系統)** must adhere to these standards:
+
+### 1. Language & Format
+- **Strict Requirement**: The Analysis Report and all messages **MUST** be written in **Traditional Chinese (zh-TW)**.
+- Use professional terminology (e.g., "核銷邏輯", "架構一致性").
+
+### 2. Consistency Pass
+- **Audit Logic**: Verify YC rules mapping across spec/plan/tasks.
+- **UI Architecture**: Check for 75%/25% dual-column layout alignment.
+- **Privacy**: Verify memory-only storage compliance.
+
+## Execution Steps
+
+### 1. Initialize Analysis Context
+Run `.specify/scripts/powershell/check-prerequisites.ps1 -Json -RequireTasks -IncludeTasks` once from repo root. Parse SPEC, PLAN, TASKS.
+
+### 2. Detection Passes (**zh-TW**)
+- **重複檢查 (Duplication)**
+- **歧義檢查 (Ambiguity)**
+- **規格不足 (Underspecification)**
+- **憲章合規性 (Constitution Alignment)**
+- **覆蓋率缺口 (Coverage Gaps)**
+
+### 3. Produce Analysis Report (**zh-TW Only**)
+
+- **Generate Report**: Create the content following the structure below.
+- **Save to File**: You **MUST** save the full report to `FEATURE_DIR/analyze-01.md`.
+
+## 規格分析報告 (Specification Analysis Report)
+
+| ID | 類別 | 嚴重程度 | 位置 | 摘要說明 | 修復建議 |
+|----|----------|----------|-------------|---------|----------------|
+
+### 4. Metrics & Next Actions
+Output metrics and suggestions in **zh-TW**.
+
+## Operating Principles
+
+### Context Efficiency
+
+- **Minimal high-signal tokens**: Focus on actionable findings, not exhaustive documentation
+- **Progressive disclosure**: Load artifacts incrementally; don't dump all content into analysis
+- **Token-efficient output**: Limit findings table to 50 rows; summarize overflow
+- **Deterministic results**: Rerunning without changes should produce consistent IDs and counts
+
+### Analysis Guidelines
+
+- **Save Report**: Always save the output to `FEATURE_DIR/analyze-01.md`.
+- **Do NOT modify source files**: `spec.md`, `plan.md`, `tasks.md` are read-only used for analysis.
+- **NEVER hallucinate missing sections** (if absent, report them accurately)
+- **Prioritize constitution violations** (these are always CRITICAL)
+- **Use examples over exhaustive rules** (cite specific instances, not generic patterns)
+- **Report zero issues gracefully** (emit success report with coverage statistics)
+
+## Context
+
+{{args}}
+"""

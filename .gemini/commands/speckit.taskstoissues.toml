@@ -1,0 +1,35 @@
+description = "Convert existing tasks into actionable, dependency-ordered GitHub issues for the feature based on available design artifacts."
+
+prompt = """
+---
+description: Convert existing tasks into actionable, dependency-ordered GitHub issues for the feature based on available design artifacts.
+tools: ['github/github-mcp-server/issue_write']
+---
+
+## User Input
+
+```text
+$ARGUMENTS
+```
+
+You **MUST** consider the user input before proceeding (if not empty).
+
+## Yucom Project Standards (MUST FOLLOW)
+
+### 1. Language Requirement
+- **Strict Requirement**: All GitHub issue titles and bodies **MUST** be written in **Traditional Chinese (zh-TW)**.
+
+## Outline
+
+1. Run `.specify/scripts/powershell/check-prerequisites.ps1 -Json -RequireTasks -IncludeTasks` from repo root.
+
+2. Verify GitHub remote URL.
+
+3. **Convert Tasks to Issues**:
+   - For each task in `tasks.md`, create a GitHub issue.
+   - **Title**: Use the task description in **zh-TW**.
+   - **Body**: Include task details and reference the Yucom project context in **zh-TW**.
+
+> [!CAUTION]
+> UNDER NO CIRCUMSTANCES EVER CREATE ISSUES IN REPOSITORIES THAT DO NOT MATCH THE REMOTE URL
+"""

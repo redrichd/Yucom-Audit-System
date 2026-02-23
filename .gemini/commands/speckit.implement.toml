@@ -1,0 +1,76 @@
+description = "Execute the implementation plan by processing and executing all tasks defined in tasks.md"
+
+prompt = """
+---
+description: Execute the implementation plan by processing and executing all tasks defined in tasks.md
+handoffs:
+  - label: 建立驗收清單 (Create Verification Checklist)
+    agent: speckit.checklist
+    prompt: 請根據已完成的功能建立驗收檢查清單 (Create a verification checklist based on implemented features)
+---
+
+## User Input
+
+```text
+$ARGUMENTS
+```
+
+You **MUST** consider the user input before proceeding (if not empty).
+
+## Yucom Project Standards (MUST FOLLOW)
+
+All implementations for the **Yucom Audit System (悠康電子服務紀錄稽核系統)** must adhere to these standards:
+
+### 1. Language & Format
+- **Strict Requirement**: All progress reports, status tables, and error messages **MUST** be written in **Traditional Chinese (zh-TW)**.
+- Use professional terminology.
+
+### 2. Implementation Guardrails
+- **Tech Stack Check**: Ensure only React 18, Vite, Tailwind, and FastAPI (Python) are used.
+- **Privacy Enforcement**: Verify that no code writes PDF content to disk (Local memory or blob URLs only).
+- **UI Architecture**: Implementation must follow the 75% (PDF) / 25% (Sidebar) fixed layout.
+- **YC Logic Validation**: YC-coded logical rules (YC01-8, etc.) must be implemented exactly as specified in the plan.
+
+## Outline
+
+1. Run `.specify/scripts/powershell/check-prerequisites.ps1 -Json -RequireTasks -IncludeTasks` from repo root.
+
+2. **Check checklists status** (**zh-TW**):
+   - Scan all checklist files.
+   - Create a status table in **zh-TW**:
+
+     ```text
+     | 核對清單 (Checklist) | 總計 | 已完成 | 待處理 | 狀態 |
+     |-----------|-------|-----------|------------|--------|
+     ```
+
+   - **If any checklist is incomplete**: STOP and ask in **zh-TW**.
+
+3. Load and analyze the implementation context (tasks.md, plan.md, etc.).
+
+4. **Project Setup Verification**:
+   - Create/verify `.gitignore`, `.dockerignore`, etc.
+   - Ensure patterns for Python (`__pycache__`, `.venv`) and React (`node_modules`, `dist`) are present.
+
+5. Parse `tasks.md` structure in **zh-TW**.
+
+6. Execute implementation following the task plan:
+   - Phase-by-phase execution in **zh-TW**.
+   - Respect dependencies and parallel markers.
+
+7. Tracking and UI Implementation rules:
+   - **Frontend**: Use Tailwind brand colors (`#7FB069`, etc.) and Noto Sans TC.
+   - **Backend**: Implement coordinates-to-canvas mapping logic.
+   - **Security**: Implement `URL.revokeObjectURL()` cleanup tasks.
+
+8. Progress tracking in **zh-TW**:
+   - Report progress after each task.
+   - Mark tasks as `[X]` in `tasks.md`.
+
+9. Completion validation:
+   - Report final status in **zh-TW**.
+
+
+注意: 此指令假設 `tasks.md` 中已包含完整的任務分解。如果任務不完整或缺失，請建議先執行 `/speckit.tasks` 以重新產生任務列表。
+
+"""
